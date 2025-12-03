@@ -9,15 +9,12 @@ async function fileToBase64(file) {
   });
 }
 
-let parsedModules = []; // array of {model, watts, isc, imp, fuse}
+let parsedModules = [];
 
 async function uploadAndExtract() {
   const fileInput = $('pdf');
   const file = fileInput.files[0];
-  if (!file) {
-    updateStatus('Please choose a PDF file first.', true);
-    return;
-  }
+  if (!file) { updateStatus('Please choose a PDF file first.', true); return; }
   updateStatus('Uploading and extracting…', false);
   try {
     const base64 = await fileToBase64(file);
@@ -27,34 +24,17 @@ async function uploadAndExtract() {
       body: JSON.stringify({ file: base64 })
     });
     const data = await resp.json();
-    if (data.error) {
-      updateStatus('Extraction error: ' + data.error, true);
-      return;
-    }
+    if (data.error) { updateStatus('Extraction error: ' + data.error, true); return; }
 
     parsedModules = data.modules || [];
-    const seen = new Set();
-    const uniqueByWatts = [];
-    parsedModules.forEach(m => {
-      if (m.watts && !seen.has(m.watts)) {
-        seen.add(m.watts);
-        uniqueByWatts.push(m);
-      }
-    });
-
-    if (uniqueByWatts.length === 0) {
+    if (parsedModules.length === 0) {
       updateStatus('No module variants found — you may need to enter values manually.', true);
       $('variantArea').classList.add('hidden');
-    } else if (uniqueByWatts.length === 1) {
-      populateModuleSelect(uniqueByWatts);
-      $('variantArea').classList.remove('hidden');
-      updateStatus('One variant found. Please select it to populate values.', false);
     } else {
-      populateModuleSelect(uniqueByWatts);
+      populateModuleSelect(parsedModules);
       $('variantArea').classList.remove('hidden');
-      updateStatus(uniqueByWatts.length + ' variants found. Please pick the correct wattage.', false);
+      updateStatus(parsedModules.length + ' variants found. Please pick the correct wattage.', false);
     }
-
     $('extractedPreview').textContent = data.raw || data.extractedText || '';
   } catch (err) {
     console.error(err);

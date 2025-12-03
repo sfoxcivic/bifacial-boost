@@ -1,16 +1,14 @@
-# Bifacial Boost Estimator (Netlify-ready) — Module Variant Selection
+# Bifacial Boost Estimator (Netlify-ready) — STC Column Parser v3
 
-This package improves module datasheet extraction by detecting multiple module variants
-in one PDF and presenting a manual wattage-only selector for the user to pick the variant.
-It explicitly ignores lines mentioning bifacial/gain/boost so the manufacturer-provided
-boost figures are not used.
+This package implements a strict STC table column parser:
+- Finds the STC header row with multiple wattages (WP/Pmax)
+- Extracts corresponding Imp and Isc columns
+- Ignores W/m2, bifacial boost notes, and percent signs
+- Returns modules: [{watts, model, isc, imp}]
 
-Deployment:
-1. Push to GitHub and import into Netlify (Import from Git).
-2. Netlify will install dependencies and deploy functions.
-3. Test by uploading a real module datasheet with multiple Pmax variants.
+Deploy:
+1. Push to GitHub and import into Netlify
+2. Netlify will install pdf-parse and deploy functions
+3. Test with datasheets that have columnar STC tables (like your screenshot)
 
-Local dev:
-- npm install
-- npm i -g netlify-cli
-- netlify dev
+If extraction fails, enter values manually in the UI.
