@@ -1,0 +1,1 @@
+console.log('Bifacial Boost App Ready');
