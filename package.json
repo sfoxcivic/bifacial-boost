@@ -1,0 +1,9 @@
+{
+  "name": "bifacial-boost",
+  "version": "1.0.0",
+  "main": "index.html",
+  "type": "module",
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  }
+}
