@@ -1,7 +1,6 @@
 {
-  "name": "bifacial-boost",
+  "name": "bifacial-boost-netlify",
   "version": "1.0.0",
-  "main": "index.html",
   "type": "module",
   "dependencies": {
     "pdf-parse": "^1.1.1"
