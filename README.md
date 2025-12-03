@@ -1,15 +1,16 @@
-# Bifacial Boost Estimator (Netlify-ready)
+# Bifacial Boost Estimator (Netlify-ready) — Module Variant Selection
 
-This project is a polished UI for estimating bifacial boost and supports uploading a module datasheet (PDF),
-extracting Isc/Imp/fuse values, and calculating conservative bifacial boost using geometry multipliers.
+This package improves module datasheet extraction by detecting multiple module variants
+in one PDF and presenting a manual wattage-only selector for the user to pick the variant.
+It explicitly ignores lines mentioning bifacial/gain/boost so the manufacturer-provided
+boost figures are not used.
 
-## Deploy on Netlify (from Git)
-1. Create a GitHub repo and push this folder.
-2. In Netlify, choose "Import from Git" and select the repo.
-3. Netlify will detect functions in `netlify/functions`.
-4. Deploy.
+Deployment:
+1. Push to GitHub and import into Netlify (Import from Git).
+2. Netlify will install dependencies and deploy functions.
+3. Test by uploading a real module datasheet with multiple Pmax variants.
 
-## Local dev with Netlify CLI
-- `npm i -g netlify-cli`
-- `npm install` (to install pdf-parse)
-- `netlify dev`
+Local dev:
+- npm install
+- npm i -g netlify-cli
+- netlify dev

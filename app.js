@@ -1,7 +1,3 @@
-// Full frontend logic for Bifacial Boost Estimator (Polished UI)
-// Uploads PDF as base64 to Netlify function /.netlify/functions/extract
-// Receives Isc, Imp, fuse, bifacialNote, rawText
-
 const $ = (id) => document.getElementById(id);
 
 async function fileToBase64(file) {
@@ -12,6 +8,8 @@ async function fileToBase64(file) {
     reader.readAsDataURL(file);
   });
 }
+
+let parsedModules = []; // array of {model, watts, isc, imp, fuse}
 
 async function uploadAndExtract() {
   const fileInput = $('pdf');
@@ -33,19 +31,63 @@ async function uploadAndExtract() {
       updateStatus('Extraction error: ' + data.error, true);
       return;
     }
-    // Populate fields
-    if (data.Isc) $('isc').value = data.Isc;
-    if (data.Imp) $('imp').value = data.Imp;
-    if (data.fuse) $('fuse').value = data.fuse;
-    if (data.bifacialNote) {
-      alert('⚠️ Datasheet indicates bifacial/bifacial correction notes present.');
+
+    parsedModules = data.modules || [];
+    const seen = new Set();
+    const uniqueByWatts = [];
+    parsedModules.forEach(m => {
+      if (m.watts && !seen.has(m.watts)) {
+        seen.add(m.watts);
+        uniqueByWatts.push(m);
+      }
+    });
+
+    if (uniqueByWatts.length === 0) {
+      updateStatus('No module variants found — you may need to enter values manually.', true);
+      $('variantArea').classList.add('hidden');
+    } else if (uniqueByWatts.length === 1) {
+      populateModuleSelect(uniqueByWatts);
+      $('variantArea').classList.remove('hidden');
+      updateStatus('One variant found. Please select it to populate values.', false);
+    } else {
+      populateModuleSelect(uniqueByWatts);
+      $('variantArea').classList.remove('hidden');
+      updateStatus(uniqueByWatts.length + ' variants found. Please pick the correct wattage.', false);
     }
-    $('extractedPreview').textContent = data.raw || (data.extractedText || '').slice(0, 3000);
-    updateStatus('Extraction complete.', false);
+
+    $('extractedPreview').textContent = data.raw || data.extractedText || '';
   } catch (err) {
     console.error(err);
     updateStatus('Upload failed: ' + err.message, true);
   }
+}
+
+function populateModuleSelect(mods) {
+  const sel = $('moduleSelect');
+  sel.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '-- select wattage --';
+  sel.appendChild(placeholder);
+  mods.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.watts + '|' + (m.model || '');
+    opt.textContent = (m.watts ? (m.watts + 'W') : 'Unknown') + (m.model ? ' – ' + m.model : '');
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', onModuleSelected);
+}
+
+function onModuleSelected(e) {
+  const val = e.target.value;
+  if (!val) return;
+  const [watts, model] = val.split('|');
+  const match = parsedModules.find(m => String(m.watts) === String(watts) && (m.model === model || !model));
+  if (!match) return;
+  if (match.isc) $('isc').value = match.isc;
+  if (match.imp) $('imp').value = match.imp;
+  if (match.fuse) $('fuse').value = match.fuse;
+  updateStatus('Module values populated from selected variant.', false);
 }
 
 function updateStatus(msg, isError=false) {
@@ -95,7 +137,7 @@ function calculateBoost() {
   const fuse = parseFloat($('fuse').value);
 
   if (!isc || !imp) {
-    alert('Please provide module Isc and Imp (either manually or via PDF extraction).');
+    alert('Please provide module Isc and Imp (either manually or via PDF extraction and module selection).');
     return;
   }
 
@@ -111,7 +153,6 @@ function calculateBoost() {
   $('iscVal').textContent = isc_eff.toFixed(2);
   $('impVal').textContent = imp_eff.toFixed(2);
 
-  // Suggested note: compare with fuse / manufacturer limits
   let notes = [];
   if (fuse) {
     notes.push('Sheet max fuse: ' + fuse + ' A');
@@ -130,19 +171,13 @@ function resetForm() {
   $('iscVal').textContent = '—';
   $('impVal').textContent = '—';
   $('notesVal').textContent = '—';
+  $('variantArea').classList.add('hidden');
+  parsedModules = [];
   updateStatus('No file loaded.', false);
 }
 
-// event listeners
 document.addEventListener('DOMContentLoaded', () => {
   $('extractBtn').addEventListener('click', uploadAndExtract);
   $('calcBtn').addEventListener('click', calculateBoost);
   $('resetBtn').addEventListener('click', resetForm);
-
-  // enable Enter-key calculate when in numbers
-  ['isc','imp','gcr','clearance'].forEach(id => {
-    $(id).addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') calculateBoost();
-    });
-  });
 });

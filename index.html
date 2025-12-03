@@ -11,7 +11,7 @@
   <div class="max-w-6xl mx-auto p-6">
     <header class="mb-6">
       <h1 class="text-3xl font-semibold text-slate-800">Bifacial Boost Estimator</h1>
-      <p class="text-slate-600 mt-1">Polished UI — upload a module datasheet (PDF) to auto-fill module values and calculate conservative bifacial boost for BOS sizing.</p>
+      <p class="text-slate-600 mt-1">Upload a module datasheet (PDF), pick the exact module variant (manual selection), and calculate conservative bifacial boost for BOS sizing.</p>
     </header>
 
     <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -27,6 +27,12 @@
               <button id="extractBtn" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700">Extract</button>
             </div>
             <p id="extractStatus" class="text-sm text-slate-500 mt-2">No file loaded.</p>
+          </div>
+
+          <div id="variantArea" class="hidden">
+            <label class="block text-sm text-slate-600">Select Module Variant</label>
+            <select id="moduleSelect" class="mt-2 w-full rounded-lg p-2 border-slate-200"></select>
+            <p class="text-xs text-slate-500 mt-2">Multiple variants found — pick the exact wattage. The app will <strong>not</strong> choose for you.</p>
           </div>
 
           <div>
@@ -73,7 +79,6 @@
         <div class="mt-6 flex gap-3">
           <button id="calcBtn" class="px-5 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Calculate Boost</button>
           <button id="resetBtn" class="px-4 py-3 border rounded-lg text-slate-700 bg-white hover:bg-slate-50">Reset</button>
-          <button id="downloadBtn" class="ml-auto px-4 py-3 bg-slate-800 text-white rounded-lg hidden">Download Report</button>
         </div>
 
       </section>
